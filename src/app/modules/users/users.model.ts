@@ -15,7 +15,7 @@ const userAddressSchema = new Schema<IUserAddress>({
 const userSchema = new Schema<IUser>({
   userId: { type: Number, required: true, unique: true },
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   fullName: { type: userNameSchema, required: true },
   age: { type: Number, required: true },
   email: { type: String, required: true, unique: true, trim: true },
