@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { IUserAddress, IUserName, Iuser } from './users.interface';
+import { IUserAddress, IUserName, IUser } from './users.interface';
 
 const userNameSchema = new Schema<IUserName>({
   firstName: { type: String, required: true, trim: true },
@@ -12,7 +12,7 @@ const userAddressSchema = new Schema<IUserAddress>({
   country: { type: String, trim: true },
 });
 
-const userSchema = new Schema<Iuser>({
+const userSchema = new Schema<IUser>({
   userId: { type: Number, required: true, unique: true },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -24,4 +24,4 @@ const userSchema = new Schema<Iuser>({
   address: { type: userAddressSchema },
 });
 
-export const User = model<Iuser>('User', userSchema);
+export const UserModel = model<IUser>('User', userSchema);

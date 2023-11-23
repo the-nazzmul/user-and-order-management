@@ -9,7 +9,7 @@ export interface IUserAddress {
   country: string;
 }
 
-export interface Iuser {
+export interface IUser {
   userId: number;
   username: string;
   password: string;
