@@ -18,13 +18,13 @@ const getAllUsersFromDB = async () => {
   return result;
 };
 
-const getSingleUserFromDB = async (id: string) => {
-  const result = await UserModel.findOne({ userId: id });
+const getSingleUserFromDB = async (userId: number) => {
+  const result = await UserModel.findOne({ userId });
   return result;
 };
 
-const updateSingleUserInDB = async (id: string, userData: IUser) => {
-  const query = { userId: id };
+const updateSingleUserInDB = async (userId: string, userData: IUser) => {
+  const query = { userId };
   const result = await UserModel.findOneAndUpdate(
     query,
     { $set: userData },
@@ -33,9 +33,15 @@ const updateSingleUserInDB = async (id: string, userData: IUser) => {
   return result;
 };
 
+const deleteUserFromDB = async (userId: string) => {
+  const result = await UserModel.updateOne({ userId }, { isDeleted: true });
+  return result;
+};
+
 export const UserServices = {
   createUserInDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
   updateSingleUserInDB,
+  deleteUserFromDB,
 };
