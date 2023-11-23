@@ -12,16 +12,34 @@ const userAddressSchema = new Schema<IUserAddress>({
   country: { type: String, trim: true },
 });
 
-const userSchema = new Schema<IUser>({
-  userId: { type: Number, required: true, unique: true },
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true, select: false },
-  fullName: { type: userNameSchema, required: true },
-  age: { type: Number, required: true },
-  email: { type: String, required: true, unique: true, trim: true },
-  isActive: { type: Boolean, default: true },
-  hobbies: { type: [String] },
-  address: { type: userAddressSchema },
-});
+const userSchema = new Schema<IUser>(
+  {
+    userId: { type: Number, required: true, unique: true },
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true, select: false },
+    fullName: { type: userNameSchema, required: true },
+    age: { type: Number, required: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    isActive: { type: Boolean, default: true },
+    hobbies: { type: [String] },
+    address: { type: userAddressSchema },
+  },
+  {
+    toJSON: {
+      transform: function (_doc, modified) {
+        delete modified.password;
+        delete modified.fullName._id;
+        delete modified.address._id;
+        delete modified._id;
+        delete modified.__v;
+      },
+    },
+  },
+);
 
 export const UserModel = model<IUser>('User', userSchema);
