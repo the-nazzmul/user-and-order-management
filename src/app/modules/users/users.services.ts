@@ -2,9 +2,13 @@ import { IUser } from './users.interface';
 import { UserModel } from './users.model';
 
 const createUserInDB = async (userData: IUser) => {
+  if (await UserModel.userExists(userData.userId)) {
+    throw new Error('User already exists');
+  }
   const result = await UserModel.create(userData);
   return result;
 };
+
 const getAllUsersFromDB = async () => {
   const result = await UserModel.find().select({
     userId: 0,
@@ -28,7 +32,7 @@ const updateSingleUserInDB = async (userId: string, userData: IUser) => {
   const result = await UserModel.findOneAndUpdate(
     query,
     { $set: userData },
-    { new: true, runValidators:true },
+    { new: true, runValidators: true },
   );
   return result;
 };

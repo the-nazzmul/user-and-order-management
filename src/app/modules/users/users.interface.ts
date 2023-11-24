@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { Model } from 'mongoose';
 
 export interface IUserName {
   firstName: string;
@@ -25,6 +25,5 @@ export interface IUser {
 }
 
 export interface UserMethod extends Model<IUser> {
-  userExists(id: string): Promise<IUser | null>;
+  userExists(id: number): Promise<IUser | null>;
 }
-

@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { IUserAddress, IUserName, IUser } from './users.interface';
+import { IUserAddress, IUserName, IUser, UserMethod } from './users.interface';
 import bcrypt from 'bcrypt';
 import config from '../../config';
 
@@ -14,7 +14,7 @@ const userAddressSchema = new Schema<IUserAddress>({
   country: { type: String, trim: true },
 });
 
-const userSchema = new Schema<IUser>(
+const userSchema = new Schema<IUser, UserMethod>(
   {
     userId: { type: Number, required: true, unique: true },
     username: { type: String, required: true, unique: true },
@@ -79,4 +79,10 @@ userSchema.pre('aggregate', function (next) {
   next();
 });
 
-export const UserModel = model<IUser>('User', userSchema);
+// static for already existing user
+userSchema.statics.userExists = async function (id: string) {
+  const existingUser = await UserModel.findOne({ id });
+  return existingUser;
+};
+
+export const UserModel = model<IUser, UserMethod>('User', userSchema);

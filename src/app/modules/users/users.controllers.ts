@@ -107,7 +107,14 @@ const deleteUser = async (req: Request, res: Response) => {
       data: null,
     });
   } catch (err) {
-    console.log(err);
+    res.status(500).json({
+      success: false,
+      message: (err as Error).message || 'Failed to delete user',
+      error: {
+        code: 500,
+        description: (err as Error).message || 'Failed to delete user',
+      },
+    });
   }
 };
 
