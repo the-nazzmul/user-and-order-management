@@ -28,7 +28,7 @@ const updateSingleUserInDB = async (userId: string, userData: IUser) => {
   const result = await UserModel.findOneAndUpdate(
     query,
     { $set: userData },
-    { new: true },
+    { new: true, runValidators:true },
   );
   return result;
 };
