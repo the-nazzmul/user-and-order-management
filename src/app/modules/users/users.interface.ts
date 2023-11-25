@@ -25,5 +25,7 @@ export interface IUser {
 }
 
 export interface UserMethod extends Model<IUser> {
-  userExists(id: number): Promise<IUser | null>;
+  idExists(userId: number): Promise<IUser | null>;
+  userNameExists(username: string): Promise<IUser|null>
+  emailExists(email: string): Promise<IUser|null>
 }

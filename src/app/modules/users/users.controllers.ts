@@ -1,30 +1,28 @@
 import { Request, Response } from 'express';
 import { UserServices } from './users.services';
 import userValidationSchema from './users.validation';
-import { ZodError } from 'zod';
 
 const createUser = async (req: Request, res: Response) => {
-  const { user } = req.body;
   try {
-    const zodData = userValidationSchema.parse(user);
+    const { user: userData } = req.body;
+    const zodData = userValidationSchema.parse(userData);
 
     const result = await UserServices.createUserInDB(zodData);
+
     res.status(200).json({
       success: true,
       message: 'User created successfully',
       data: result,
     });
   } catch (err: unknown) {
-    if (err instanceof ZodError) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create user',
-        error: {
-          code: 500,
-          description: `${err.errors[0].path[0]} is ${err.errors[0].message}`,
-        },
-      });
-    }
+    res.status(500).json({
+      success: false,
+      message: (err as Error).message || 'Failed to create user',
+      error: {
+        status: 500,
+        description: (err as Error).message || 'Failed to create user',
+      },
+    });
   }
 };
 
@@ -41,7 +39,7 @@ const getAllUser = async (req: Request, res: Response) => {
       success: false,
       message: (err as Error).message || 'Failed to fetch users',
       error: {
-        code: 500,
+        status: 500,
         description: (err as Error).message || 'Failed to fetch users',
       },
     });
@@ -50,8 +48,9 @@ const getAllUser = async (req: Request, res: Response) => {
 
 const getSingleUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
+  const parsedUserId = parseFloat(userId);
   try {
-    const result = await UserServices.getSingleUserFromDB(parseInt(userId));
+    const result = await UserServices.getSingleUserFromDB(parsedUserId);
     res.status(200).json({
       success: true,
       message: 'User fetched successfully',
@@ -84,16 +83,14 @@ const updateSingleUser = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err: unknown) {
-    if (err instanceof ZodError) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create user',
-        error: {
-          code: 500,
-          description: `${err.errors[0].path[0]} is ${err.errors[0].message}`,
-        },
-      });
-    }
+    res.status(500).json({
+      success: false,
+      message: (err as Error).message || 'Failed to update user',
+      error: {
+        status: 500,
+        description: (err as Error).message || 'Failed to update user',
+      },
+    });
   }
 };
 

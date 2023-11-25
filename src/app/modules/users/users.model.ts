@@ -55,12 +55,6 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// emptying the password field
-userSchema.post('save', function (doc, next) {
-  doc.password = '';
-  next();
-});
-
 // middleware for deleted data
 userSchema.pre('find', function (next) {
   this.find({ isDeleted: { $ne: true } });
@@ -79,9 +73,19 @@ userSchema.pre('aggregate', function (next) {
   next();
 });
 
-// static for already existing user
-userSchema.statics.userExists = async function (id: string) {
-  const existingUser = await UserModel.findOne({ id });
+// static for already existing userId
+userSchema.statics.idExists = async function (userId: number) {
+  const existingUser = await UserModel.findOne({ userId });
+  return existingUser;
+};
+// static for already existing username
+userSchema.statics.userNameExists = async function (username: string) {
+  const existingUser = await UserModel.findOne({ username });
+  return existingUser;
+};
+// static for already existing email
+userSchema.statics.emailExists = async function (email: string) {
+  const existingUser = await UserModel.findOne({ email });
   return existingUser;
 };
 
