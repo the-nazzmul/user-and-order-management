@@ -2,32 +2,37 @@
 
 This is a small back-end project for storing user and order information in MongoDB. Use postman to test it.
 
-## Table of Contents
+## Dependencies
 
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-- [Development](#development)
-- [Testing](#testing)
-- [Linting](#linting)
-- [Contributing](#contributing)
-- [License](#license)
+- bcrypt: ^5.1.1
+- cors: ^2.8.5
+- dotenv: ^16.3.1
+- express: ^4.18.2
+- mongoose: ^8.0.1
+- zod: ^3.22.4
 
-## Prerequisites
+## Dev Dependencies
 
-Before you begin, ensure you have met the following requirements:
+- @types/bcrypt: ^5.0.2
+- @types/cors: ^2.8.17
+- @types/express: ^4.17.21
+- @typescript-eslint/eslint-plugin: ^6.12.0
+- @typescript-eslint/parser: ^6.12.0
+- eslint: ^8.54.0
+- eslint-config-prettier: ^9.0.0
+- eslint-plugin-react: ^7.33.2
+- prettier: ^3.1.0
+- ts-node-dev: ^2.0.0
+- typescript: ^5.3.2
 
-- Node.js installed
-- MongoDB installed and running
-- Git installed
+## 1.Installation
 
-## Getting Started
+Run `npm install` to install project dependencies.
 
-### 1. Clone the Repository
+## 2.Environment setup
 
-```bash
-git clone https://github.com/your-username/your-project.git
+Create a .env file and put your environment variable there.
 
-### 2. Install Dependencies
+## Usage
 
-```bash
-git clone https://github.com/your-username/your-project.git
+Run `npm run dev` to run the project locally.
