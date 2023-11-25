@@ -75,7 +75,11 @@ const createOrderInDB = async (userId: number, product: IProducts) => {
   const existingUser = await UserModel.idExists(userId);
   if (!existingUser) {
     throw new Error("User doesn't exists!");
-  } else if (await !UserModel.findOne({ orders: { $exists: true } })) {
+  } else if (
+    await !UserModel.findOne({
+      orders: { $and: [{ $exists: true }, { $type: { $ne: null } }] },
+    })
+  ) {
     await UserModel.findOneAndUpdate(
       { userId: userId },
       { $set: { orders: [product] } },
@@ -97,6 +101,10 @@ const getAllOrdersFromDB = async (userId: number) => {
   if (!existingUser) {
     throw new Error("User doesn't exists!");
   }
+  if (await UserModel.findOne({ orders: { $exists: false } })) {
+    throw new Error("You haven't ordered any product");
+  }
+
   const result = await UserModel.findOne({ userId }, { 'orders._id': 0 });
   return result;
 };
@@ -106,6 +114,10 @@ const getTotalOrderPriceFromDB = async (userId: number) => {
   if (!existingUser) {
     throw new Error("User doesn't exists");
   }
+  if (await UserModel.findOne({ orders: { $exists: false } })) {
+    throw new Error("You haven't ordered anything");
+  }
+
   const result = await UserModel.aggregate([
     { $match: { userId: userId } },
     { $unwind: '$orders' },
