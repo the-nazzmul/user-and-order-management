@@ -31,10 +31,14 @@ Run `npm install` to install project dependencies.
 
 ## 2.Environment setup
 
-Create a `.env` file and put your environment variable there.
+Create a `.env` file and put your environment variable there. Save the following variable:
+
+PORT= Your port
+DATABASE_URL= Your MongoDB Atlas URL
+BCRYPT_SALT_ROUND= Your value (should be a number)
 
 ## Usage
 
 Run `npm run dev` to run the project locally.
 
-## Api Link : [Here](https://user-and-order-management-lemon.vercel.app/)
+### Api Link : (https://user-and-order-management-lemon.vercel.app/)
