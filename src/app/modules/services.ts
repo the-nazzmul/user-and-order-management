@@ -23,12 +23,13 @@ const createUserInDB = async (userData: IUser) => {
 const getAllUsersFromDB = async () => {
   const result = await UserModel.find().select({
     userId: 0,
-    _id: 0,
+    // _id: 0,
     'fullName._id': 0,
     'address._id': 0,
     isActive: 0,
     hobbies: 0,
     __v: 0,
+    orders: 0,
   });
   return result;
 };
@@ -46,18 +47,16 @@ const getSingleUserFromDB = async (userId: number) => {
 // update a user
 
 const updateSingleUserInDB = async (userId: string, userData: IUser) => {
-  const query = { userId };
-  if (await !UserModel.idExists(userData.userId)) {
-    throw new Error("You can't change userId");
-  } else if (await UserModel.idExists(userData.userId)) {
-    throw new Error("You can't change userId");
+  const existingUser = await UserModel.idExists(userData.userId);
+  if (!existingUser) {
+    throw new Error("User doesn't exist");
   } else if (await UserModel.userNameExists(userData.username)) {
     throw new Error('username already exists');
   } else if (await UserModel.emailExists(userData.email)) {
     throw new Error('Email already exists');
   }
   const result = await UserModel.findOneAndUpdate(
-    query,
+    { userId: userId },
     { $set: userData },
     { new: true, runValidators: true },
   );

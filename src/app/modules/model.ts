@@ -45,7 +45,7 @@ const userSchema = new Schema<IUser, UserMethod>(
     isActive: { type: Boolean, default: true },
     hobbies: { type: [String] },
     address: { type: userAddressSchema },
-    orders: { type: [productSchema] },
+    orders: { type: [productSchema], default: undefined },
     isDeleted: { type: Boolean, default: false },
   },
   {
@@ -95,7 +95,9 @@ userSchema.pre('aggregate', function (next) {
 
 // static for already existing userId
 userSchema.statics.idExists = async function (userId: number) {
-  const existingUser = await UserModel.findOne({ userId });
+  const existingUser = await UserModel.findOne({ userId }).select({
+    orders: 0,
+  });
   return existingUser;
 };
 // static for already existing username
@@ -112,4 +114,3 @@ userSchema.statics.emailExists = async function (email: string) {
 /*___________________________MODELS___________________________*/
 
 export const UserModel = model<IUser, UserMethod>('User', userSchema);
-

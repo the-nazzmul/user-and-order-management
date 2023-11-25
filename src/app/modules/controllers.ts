@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Services } from './services';
 import userValidationSchema from './validations/users.validation';
 import productValidationSchema from './validations/orders.validaton';
+import { ZodError } from 'zod';
 
 const createUser = async (req: Request, res: Response) => {
   try {
@@ -16,6 +17,16 @@ const createUser = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err: unknown) {
+    if (err instanceof ZodError) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create user',
+        error: {
+          status: 500,
+          description: `${err.issues[0].path[0]} is ${err.issues[0].message}`,
+        },
+      });
+    }
     res.status(500).json({
       success: false,
       message: (err as Error).message || 'Failed to create user',
@@ -81,6 +92,16 @@ const updateSingleUser = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err: unknown) {
+    if (err instanceof ZodError) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update user',
+        error: {
+          status: 500,
+          description: `${err.issues[0].path[0]} is ${err.issues[0].message}`,
+        },
+      });
+    }
     res.status(500).json({
       success: false,
       message: (err as Error).message || 'Failed to update user',

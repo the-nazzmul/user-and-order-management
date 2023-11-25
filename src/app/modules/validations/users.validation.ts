@@ -17,28 +17,18 @@ const productValidationSchema = z.object({
   quantity: z.number(),
 });
 
-const userValidationSchema = z
-  .object({
-    userId: z.number().int().positive(),
-    username: z.string().min(1),
-    password: z.string().min(1),
-    fullName: userNameValidationSchema,
-    age: z.number().int().positive(),
-    email: z.string().email(),
-    isActive: z.boolean(),
-    hobbies: z.array(z.string()),
-    address: userAddressValidationSchema,
-    orders: z.array(productValidationSchema),
-    isDeleted: z.boolean().optional().default(false),
-  })
-  .required({
-    userId: true,
-    username: true,
-    password: true,
-    fullName: true,
-    age: true,
-    email: true,
-    address: true,
-  });
+const userValidationSchema = z.object({
+  userId: z.number().int().positive(),
+  username: z.string().min(1),
+  password: z.string().min(1),
+  fullName: userNameValidationSchema,
+  age: z.number().int().positive(),
+  email: z.string().email(),
+  isActive: z.boolean(),
+  hobbies: z.array(z.string()),
+  address: userAddressValidationSchema,
+  orders: z.array(productValidationSchema).optional(),
+  isDeleted: z.boolean().optional().default(false),
+});
 
 export default userValidationSchema;
