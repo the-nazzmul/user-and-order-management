@@ -1,6 +1,6 @@
 // import { Error } from 'mongoose';
-import { IUser } from './users.interface';
-import { UserModel } from './users.model';
+import { IProducts, IUser } from './interface';
+import { UserModel } from './model';
 
 // Create user
 const createUserInDB = async (userData: IUser) => {
@@ -71,10 +71,45 @@ const deleteUserFromDB = async (userId: string) => {
   return result;
 };
 
-export const UserServices = {
+const createOrderInDB = async (userId: number, product: IProducts) => {
+  const existingUser = await UserModel.idExists(userId);
+  if (!existingUser) {
+    throw new Error("User doesn't exists!");
+  } else {
+    const existingOrders = await UserModel.findOne({
+      orders: { $exists: true },
+    });
+    if (!existingOrders) {
+      await UserModel.findOneAndUpdate(
+        { userId: userId },
+        { $set: { orders: [product] } },
+        { new: true },
+      );
+      return null;
+    } else {
+      await UserModel.findOneAndUpdate(
+        { userId: userId },
+        { $push: { orders: product } },
+        { new: true },
+      );
+      return null;
+    }
+  }
+  // // const existingOrders = existingUser.orders;
+  // // if (!existingOrders) {
+  // //   const result = await UserModel.findOneAndUpdate(
+  // //     { userId: userId },
+  // //     { $set: { orders: [product] } },
+  // //   );
+  // //   console.log(result);
+  // }
+};
+
+export const Services = {
   createUserInDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
   updateSingleUserInDB,
   deleteUserFromDB,
+  createOrderInDB,
 };

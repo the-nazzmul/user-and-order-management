@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
-import { UserServices } from './users.services';
-import userValidationSchema from './users.validation';
+import { Services } from './services';
+import userValidationSchema from './validations/users.validation';
+import productValidationSchema from './validations/orders.validaton';
 
 const createUser = async (req: Request, res: Response) => {
   try {
     const { user: userData } = req.body;
     const zodData = userValidationSchema.parse(userData);
 
-    const result = await UserServices.createUserInDB(zodData);
+    const result = await Services.createUserInDB(zodData);
 
     res.status(200).json({
       success: true,
@@ -28,7 +29,7 @@ const createUser = async (req: Request, res: Response) => {
 
 const getAllUser = async (req: Request, res: Response) => {
   try {
-    const result = await UserServices.getAllUsersFromDB();
+    const result = await Services.getAllUsersFromDB();
     res.status(200).json({
       success: true,
       message: 'Users fetched successfully',
@@ -50,7 +51,7 @@ const getSingleUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
   const parsedUserId = parseFloat(userId);
   try {
-    const result = await UserServices.getSingleUserFromDB(parsedUserId);
+    const result = await Services.getSingleUserFromDB(parsedUserId);
     res.status(200).json({
       success: true,
       message: 'User fetched successfully',
@@ -73,10 +74,7 @@ const updateSingleUser = async (req: Request, res: Response) => {
   const { user } = req.body;
   try {
     const validatedData = userValidationSchema.parse(user);
-    const result = await UserServices.updateSingleUserInDB(
-      userId,
-      validatedData,
-    );
+    const result = await Services.updateSingleUserInDB(userId, validatedData);
     res.status(200).json({
       success: true,
       message: 'User updated successfully',
@@ -97,7 +95,7 @@ const updateSingleUser = async (req: Request, res: Response) => {
 const deleteUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
   try {
-    await UserServices.deleteUserFromDB(userId);
+    await Services.deleteUserFromDB(userId);
     res.status(200).json({
       success: true,
       message: 'User deleted successfully',
@@ -114,11 +112,37 @@ const deleteUser = async (req: Request, res: Response) => {
     });
   }
 };
+const createOrder = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const parsedUserId = parseInt(userId);
+    const product = req.body;
 
-export const UserControllers = {
+    const zodParsedOrder = productValidationSchema.parse(product);
+
+    const result = await Services.createOrderInDB(parsedUserId, zodParsedOrder);
+    res.status(200).json({
+      success: true,
+      message: 'Successfully placed order',
+      data: result,
+    });
+  } catch (err: unknown) {
+    res.status(500).json({
+      success: false,
+      message: (err as Error).message || 'Failed to place order',
+      error: {
+        status: 500,
+        description: (err as Error) || 'Failed to place order',
+      },
+    });
+  }
+};
+
+export const Controllers = {
   createUser,
   getAllUser,
   getSingleUser,
   updateSingleUser,
   deleteUser,
+  createOrder,
 };

@@ -10,6 +10,11 @@ export interface IUserAddress {
   city: string;
   country: string;
 }
+export interface IProducts {
+  productName: string;
+  price: number;
+  quantity: number;
+}
 
 export interface IUser {
   userId: number;
@@ -21,11 +26,12 @@ export interface IUser {
   isActive: boolean;
   hobbies: string[];
   address: IUserAddress;
+  orders: IProducts[];
   isDeleted: boolean;
 }
 
 export interface UserMethod extends Model<IUser> {
   idExists(userId: number): Promise<IUser | null>;
-  userNameExists(username: string): Promise<IUser|null>
-  emailExists(email: string): Promise<IUser|null>
+  userNameExists(username: string): Promise<IUser | null>;
+  emailExists(email: string): Promise<IUser | null>;
 }

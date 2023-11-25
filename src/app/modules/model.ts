@@ -1,7 +1,15 @@
 import { Schema, model } from 'mongoose';
-import { IUserAddress, IUserName, IUser, UserMethod } from './users.interface';
+import {
+  IUserAddress,
+  IUserName,
+  IUser,
+  UserMethod,
+  IProducts,
+} from './interface';
 import bcrypt from 'bcrypt';
-import config from '../../config';
+import config from '../config';
+
+/*________________________SCHEMAS_________________________ */
 
 const userNameSchema = new Schema<IUserName>({
   firstName: { type: String, required: true, trim: true },
@@ -14,6 +22,13 @@ const userAddressSchema = new Schema<IUserAddress>({
   country: { type: String, trim: true },
 });
 
+const productSchema = new Schema<IProducts>({
+  productName: { type: String, required: true },
+  price: { type: Number, required: true },
+  quantity: { type: Number, required: true },
+});
+
+// schema for users
 const userSchema = new Schema<IUser, UserMethod>(
   {
     userId: { type: Number, required: true, unique: true },
@@ -30,6 +45,7 @@ const userSchema = new Schema<IUser, UserMethod>(
     isActive: { type: Boolean, default: true },
     hobbies: { type: [String] },
     address: { type: userAddressSchema },
+    orders: { type: [productSchema] },
     isDeleted: { type: Boolean, default: false },
   },
   {
@@ -45,6 +61,8 @@ const userSchema = new Schema<IUser, UserMethod>(
     },
   },
 );
+
+/*__________________________MIDDLEWARES___________________ */
 
 // middle for hashing the password
 userSchema.pre('save', async function (next) {
@@ -73,6 +91,8 @@ userSchema.pre('aggregate', function (next) {
   next();
 });
 
+/*________________________CUSTOM STATICS______________________*/
+
 // static for already existing userId
 userSchema.statics.idExists = async function (userId: number) {
   const existingUser = await UserModel.findOne({ userId });
@@ -89,4 +109,7 @@ userSchema.statics.emailExists = async function (email: string) {
   return existingUser;
 };
 
+/*___________________________MODELS___________________________*/
+
 export const UserModel = model<IUser, UserMethod>('User', userSchema);
+
