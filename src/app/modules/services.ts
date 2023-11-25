@@ -75,34 +75,51 @@ const createOrderInDB = async (userId: number, product: IProducts) => {
   const existingUser = await UserModel.idExists(userId);
   if (!existingUser) {
     throw new Error("User doesn't exists!");
+  } else if (await !UserModel.findOne({ orders: { $exists: true } })) {
+    await UserModel.findOneAndUpdate(
+      { userId: userId },
+      { $set: { orders: [product] } },
+      { new: true },
+    );
+    return null;
   } else {
-    const existingOrders = await UserModel.findOne({
-      orders: { $exists: true },
-    });
-    if (!existingOrders) {
-      await UserModel.findOneAndUpdate(
-        { userId: userId },
-        { $set: { orders: [product] } },
-        { new: true },
-      );
-      return null;
-    } else {
-      await UserModel.findOneAndUpdate(
-        { userId: userId },
-        { $push: { orders: product } },
-        { new: true },
-      );
-      return null;
-    }
+    await UserModel.findOneAndUpdate(
+      { userId: userId },
+      { $push: { orders: product } },
+      { new: true },
+    );
+    return null;
   }
-  // // const existingOrders = existingUser.orders;
-  // // if (!existingOrders) {
-  // //   const result = await UserModel.findOneAndUpdate(
-  // //     { userId: userId },
-  // //     { $set: { orders: [product] } },
-  // //   );
-  // //   console.log(result);
-  // }
+};
+
+const getAllOrdersFromDB = async (userId: number) => {
+  const existingUser = await UserModel.idExists(userId);
+  if (!existingUser) {
+    throw new Error("User doesn't exists!");
+  }
+  const result = await UserModel.findOne({ userId }, { 'orders._id': 0 });
+  return result;
+};
+
+const getTotalOrderPriceFromDB = async (userId: number) => {
+  const existingUser = await UserModel.idExists(userId);
+  if (!existingUser) {
+    throw new Error("User doesn't exists");
+  }
+  const result = await UserModel.aggregate([
+    { $match: { userId: userId } },
+    { $unwind: '$orders' },
+    {
+      $group: {
+        _id: null,
+        totalPrice: {
+          $sum: { $multiply: ['$orders.price', '$orders.quantity'] },
+        },
+      },
+    },
+    { $project: { _id: 0 } },
+  ]);
+  return result;
 };
 
 export const Services = {
@@ -112,4 +129,6 @@ export const Services = {
   updateSingleUserInDB,
   deleteUserFromDB,
   createOrderInDB,
+  getAllOrdersFromDB,
+  getTotalOrderPriceFromDB,
 };

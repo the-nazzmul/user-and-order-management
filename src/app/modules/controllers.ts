@@ -132,7 +132,51 @@ const createOrder = async (req: Request, res: Response) => {
       message: (err as Error).message || 'Failed to place order',
       error: {
         status: 500,
-        description: (err as Error) || 'Failed to place order',
+        description: (err as Error).message || 'Failed to place order',
+      },
+    });
+  }
+};
+
+const getAllOrders = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const parsedUserId = parseInt(userId);
+    const result = await Services.getAllOrdersFromDB(parsedUserId);
+    res.status(200).json({
+      success: true,
+      message: 'Orders fetched successfully',
+      data: { orders: result?.orders },
+    });
+  } catch (err: unknown) {
+    res.status(500).json({
+      success: false,
+      message: (err as Error).message || 'Failed to fetch order',
+      error: {
+        status: 500,
+        description: (err as Error).message || 'Failed to fetch order',
+      },
+    });
+  }
+};
+
+const getTotalOrderPrice = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const parsedUserId = parseInt(userId);
+    const result = await Services.getTotalOrderPriceFromDB(parsedUserId);
+    res.status(200).json({
+      success: true,
+      message: 'Total price calculated successfully!',
+      data: result.length > 1 ? result : result[0],
+    });
+  } catch (err: unknown) {
+    res.status(500).json({
+      success: false,
+      message: (err as Error).message || 'Failed to calculate price',
+      error: {
+        status: 500,
+        description: (err as Error).message || 'Failed to calculate price',
       },
     });
   }
@@ -145,4 +189,6 @@ export const Controllers = {
   updateSingleUser,
   deleteUser,
   createOrder,
+  getAllOrders,
+  getTotalOrderPrice,
 };
