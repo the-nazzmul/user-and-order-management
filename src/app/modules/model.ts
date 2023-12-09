@@ -95,19 +95,16 @@ userSchema.pre('aggregate', function (next) {
 
 // static for already existing userId
 userSchema.statics.idExists = async function (userId: number) {
-  const existingUser = await UserModel.findOne({ userId }).select({
-    orders: 0,
-  });
+  const existingUser = await UserModel.findOne({ userId: userId });
   return existingUser;
 };
 // static for already existing username
 userSchema.statics.userNameExists = async function (username: string) {
-  const existingUser = await UserModel.findOne({ username });
+  const existingUser = await UserModel.findOne({ username: username });
   return existingUser;
 };
-// static for already existing email
 userSchema.statics.emailExists = async function (email: string) {
-  const existingUser = await UserModel.findOne({ email });
+  const existingUser = await UserModel.findOne({ email: email });
   return existingUser;
 };
 

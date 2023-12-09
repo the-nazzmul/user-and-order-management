@@ -1,5 +1,4 @@
-// import { Error } from 'mongoose';
-import { IProducts, IUser } from './interface';
+import { IProducts, IUpdatePayload, IUser } from './interface';
 import { UserModel } from './model';
 
 // Create user
@@ -37,27 +36,73 @@ const getAllUsersFromDB = async () => {
 // get single user
 
 const getSingleUserFromDB = async (userId: number) => {
-  const result = await UserModel.idExists(userId);
-  if (!result) {
-    throw new Error("User doesn't exist");
+  const existingUser = await UserModel.idExists(userId);
+  if (!existingUser) {
+    throw new Error("User not found");
   }
+  const result = await UserModel.findOne({ userId: userId }).select({
+    orders: 0,
+  });
+
   return result;
 };
 
 // update a user
 
-const updateSingleUserInDB = async (userId: string, userData: IUser) => {
-  const existingUser = await UserModel.idExists(userData.userId);
-  if (!existingUser) {
-    throw new Error("User doesn't exist");
-  } else if (await UserModel.userNameExists(userData.username)) {
-    throw new Error('username already exists');
-  } else if (await UserModel.emailExists(userData.email)) {
-    throw new Error('Email already exists');
+const updateSingleUserInDB = async (
+  userId: number,
+  userData: IUpdatePayload,
+) => {
+  const existingUserFromParams = await UserModel.idExists(userId);
+  const existingUserIdInDB = await UserModel.idExists(
+    userData.userId as number,
+  );
+  const existingUserNameInDB = await UserModel.userNameExists(
+    userData.username as string,
+  );
+  const existingEmailIdInDB = await UserModel.emailExists(
+    userData.email as string,
+  );
+
+  // error conditions
+
+  if (!existingUserFromParams) {
+    throw new Error("User doesn't exist!");
   }
+
+  if (existingUserFromParams.userId === existingUserIdInDB?.userId) {
+    throw new Error(
+      'Your are already using this user id. Please choose a new one',
+    );
+  }
+
+  if (existingUserIdInDB) {
+    throw new Error('Someone else has the user id. Please try a new one.');
+  }
+
+  if (existingUserFromParams.username === existingUserNameInDB?.username) {
+    throw new Error(
+      'Your are already using this username. Please choose a new one',
+    );
+  }
+
+  if (existingUserNameInDB) {
+    throw new Error('Someone else has the username. Please try a new one.');
+  }
+
+  if (existingUserFromParams.email === existingEmailIdInDB?.email) {
+    throw new Error(
+      'Your are already using this email. Please choose a new one',
+    );
+  }
+
+  if (existingEmailIdInDB) {
+    throw new Error('Someone else has the email. Please try a new one.');
+  }
+
   const result = await UserModel.findOneAndUpdate(
     { userId: userId },
-    { $set: userData },
+    userData,
     { new: true, runValidators: true },
   );
   return result;
@@ -66,6 +111,10 @@ const updateSingleUserInDB = async (userId: string, userData: IUser) => {
 // delete a user
 
 const deleteUserFromDB = async (userId: string) => {
+  const existingUser = await UserModel.idExists(Number(userId));
+  if (!existingUser) {
+    throw new Error("User doesn't exist");
+  }
   const result = await UserModel.updateOne({ userId }, { isDeleted: true });
   return result;
 };
@@ -74,33 +123,31 @@ const createOrderInDB = async (userId: number, product: IProducts) => {
   const existingUser = await UserModel.idExists(userId);
   if (!existingUser) {
     throw new Error("User doesn't exists!");
-  } else if (
-    await !UserModel.findOne({
-      orders: { $and: [{ $exists: true }, { $type: { $ne: null } }] },
-    })
-  ) {
+  }
+  if (!existingUser.orders) {
     await UserModel.findOneAndUpdate(
       { userId: userId },
       { $set: { orders: [product] } },
       { new: true },
     );
     return null;
-  } else {
-    await UserModel.findOneAndUpdate(
-      { userId: userId },
-      { $push: { orders: product } },
-      { new: true },
-    );
-    return null;
   }
+  await UserModel.findOneAndUpdate(
+    { userId: userId },
+    { $push: { orders: product } },
+    { new: true },
+  );
+  return null;
 };
 
 const getAllOrdersFromDB = async (userId: number) => {
   const existingUser = await UserModel.idExists(userId);
+
   if (!existingUser) {
     throw new Error("User doesn't exists!");
   }
-  if (await UserModel.findOne({ orders: { $exists: false } })) {
+
+  if (!existingUser.orders || existingUser.orders?.length === 0) {
     throw new Error("You haven't ordered any product");
   }
 
@@ -110,10 +157,11 @@ const getAllOrdersFromDB = async (userId: number) => {
 
 const getTotalOrderPriceFromDB = async (userId: number) => {
   const existingUser = await UserModel.idExists(userId);
+
   if (!existingUser) {
-    throw new Error("User doesn't exists");
+    throw new Error("User not found");
   }
-  if (await UserModel.findOne({ orders: { $exists: false } })) {
+  if (!existingUser.orders) {
     throw new Error("You haven't ordered anything");
   }
 

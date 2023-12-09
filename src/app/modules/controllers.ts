@@ -6,7 +6,7 @@ import { ZodError } from 'zod';
 
 const createUser = async (req: Request, res: Response) => {
   try {
-    const { user: userData } = req.body;
+    const userData = req.body;
     const zodData = userValidationSchema.parse(userData);
 
     const result = await Services.createUserInDB(zodData);
@@ -23,18 +23,19 @@ const createUser = async (req: Request, res: Response) => {
         message: 'Failed to create user',
         error: {
           status: 500,
-          description: `${err.issues[0].path[0]} is ${err.issues[0].message}`,
+          description: err.issues,
+        },
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: (err as Error).message || 'Failed to create user',
+        error: {
+          status: 500,
+          description: (err as Error).message || 'Failed to create user',
         },
       });
     }
-    res.status(500).json({
-      success: false,
-      message: (err as Error).message || 'Failed to create user',
-      error: {
-        status: 500,
-        description: (err as Error).message || 'Failed to create user',
-      },
-    });
   }
 };
 
@@ -60,7 +61,7 @@ const getAllUser = async (req: Request, res: Response) => {
 
 const getSingleUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
-  const parsedUserId = parseFloat(userId);
+  const parsedUserId = Number(userId);
   try {
     const result = await Services.getSingleUserFromDB(parsedUserId);
     res.status(200).json({
@@ -69,12 +70,12 @@ const getSingleUser = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err: unknown) {
-    res.status(500).json({
+    res.status(404).json({
       success: false,
-      message: (err as Error).message || 'Failed to fetch user',
+      message: 'User not found',
       error: {
-        code: 500,
-        description: (err as Error).message || 'Failed to fetch user',
+        code: 404,
+        description: 'User not found!',
       },
     });
   }
@@ -82,10 +83,13 @@ const getSingleUser = async (req: Request, res: Response) => {
 
 const updateSingleUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
-  const { user } = req.body;
+  const parsedUserId = parseInt(userId);
   try {
-    const validatedData = userValidationSchema.parse(user);
-    const result = await Services.updateSingleUserInDB(userId, validatedData);
+    const validatedData = userValidationSchema.partial().parse(req.body);
+    const result = await Services.updateSingleUserInDB(
+      parsedUserId,
+      validatedData,
+    );
     res.status(200).json({
       success: true,
       message: 'User updated successfully',
@@ -98,18 +102,19 @@ const updateSingleUser = async (req: Request, res: Response) => {
         message: 'Failed to update user',
         error: {
           status: 500,
-          description: `${err.issues[0].path[0]} is ${err.issues[0].message}`,
+          description: err.issues,
+        },
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: (err as Error).message || 'Failed to update user',
+        error: {
+          status: 500,
+          description: (err as Error).message || 'Failed to update user',
         },
       });
     }
-    res.status(500).json({
-      success: false,
-      message: (err as Error).message || 'Failed to update user',
-      error: {
-        status: 500,
-        description: (err as Error).message || 'Failed to update user',
-      },
-    });
   }
 };
 
@@ -119,7 +124,7 @@ const deleteUser = async (req: Request, res: Response) => {
     await Services.deleteUserFromDB(userId);
     res.status(200).json({
       success: true,
-      message: 'User deleted successfully',
+      message: 'User deleted successfully!',
       data: null,
     });
   } catch (err) {
@@ -144,7 +149,7 @@ const createOrder = async (req: Request, res: Response) => {
     const result = await Services.createOrderInDB(parsedUserId, zodParsedOrder);
     res.status(200).json({
       success: true,
-      message: 'Successfully placed order',
+      message: 'Order created successfully!',
       data: result,
     });
   } catch (err: unknown) {
@@ -164,9 +169,10 @@ const getAllOrders = async (req: Request, res: Response) => {
     const { userId } = req.params;
     const parsedUserId = parseInt(userId);
     const result = await Services.getAllOrdersFromDB(parsedUserId);
+
     res.status(200).json({
       success: true,
-      message: 'Orders fetched successfully',
+      message: 'Order fetched successfully!',
       data: { orders: result?.orders },
     });
   } catch (err: unknown) {
@@ -192,12 +198,13 @@ const getTotalOrderPrice = async (req: Request, res: Response) => {
       data: result.length > 1 ? result : result[0],
     });
   } catch (err: unknown) {
-    res.status(500).json({
+    res.status(404).json({
       success: false,
       message: (err as Error).message || 'Failed to calculate price',
       error: {
-        status: 500,
-        description: (err as Error).message || 'Failed to calculate price',
+        status: 404,
+        description:
+          `${(err as Error).message}!` || 'Failed to calculate price',
       },
     });
   }

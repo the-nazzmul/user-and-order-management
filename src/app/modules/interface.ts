@@ -1,4 +1,6 @@
 import { Model } from 'mongoose';
+import { z } from 'zod';
+import userValidationSchema from './validations/users.validation';
 
 export interface IUserName {
   firstName: string;
@@ -29,6 +31,10 @@ export interface IUser {
   orders?: IProducts[] | undefined;
   isDeleted: boolean;
 }
+
+const payload = userValidationSchema.partial()
+
+export type IUpdatePayload = z.infer<typeof payload>
 
 export interface UserMethod extends Model<IUser> {
   idExists(userId: number): Promise<IUser | null>;
